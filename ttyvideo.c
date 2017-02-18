@@ -60,11 +60,22 @@ int main(int argc, char** argv) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
-		frame = cvQueryFrame(cap);
+		if(frame) {
 
-		if(!frame) break;
+			frame = cvQueryFrame(cap);
 
-		system("clear");
+			if(!frame) break;
+
+			for(i = 0; i < tty_height; ++i)
+				printf("\x1B[F");
+
+		} else {
+
+			frame = cvQueryFrame(cap);
+
+			if(!frame) break;
+
+		}
 
 		width = frame->width;
 		height = frame->height;
