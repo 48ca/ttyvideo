@@ -94,7 +94,10 @@ int main(int argc, char** argv) {
 
 				printf(COLOR_FORMAT, ansiColor);
 			}
-			printf("\n");
+			if(i < tty_height - 1)
+				printf("\n");
+			else
+				fflush(stdout);
 		}
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
