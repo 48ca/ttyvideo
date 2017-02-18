@@ -86,14 +86,15 @@ int main(int argc, char** argv) {
 				// printf("%u\n%u\n%u\n%u\n\n", r_ch*6/256, g_ch*6/256, b_ch*6/256, ansiColor);
 			}
 			printf("\n");
-			sleep(1);
 		}
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
 		delta_ns = (end.tv_sec - start.tv_sec) * NANO_CONV_FACTOR + (end.tv_nsec - start.tv_nsec);
 
-		waitFrame(delayNecessary * 100, delta_ns);
+		waitFrame(delayNecessary, delta_ns);
+
+		frameNum++;
 
 	}
 
