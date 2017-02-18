@@ -12,7 +12,7 @@
 
 #define NANO_CONV_FACTOR 1000000000
 
-#define COLOR_FORMAT "\e[38;05;%um%c"
+#define COLOR_FORMAT "\e[38;05;%um■"
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
@@ -92,9 +92,7 @@ int main(int argc, char** argv) {
 
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
-				// printf("%u %u %u :: %u ", r_ch, g_ch, b_ch, ansiColor);
-				printf(COLOR_FORMAT, ansiColor, 'C');
-				// printf("%u\n%u\n%u\n%u\n\n", r_ch*6/256, g_ch*6/256, b_ch*6/256, ansiColor);
+				printf(COLOR_FORMAT, ansiColor);
 			}
 			printf("\n");
 		}
