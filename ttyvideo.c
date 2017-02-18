@@ -13,5 +13,12 @@ int main(int argc, char** argv) {
 	if(argError) return argError;
 
 	CvCapture* cap = cvCaptureFromFile(filename);
+	if(!cap) return error("Can't read input");
+
+	IplImage* frame = cvQueryFrame(cap);
+
+	double fps = (double)cvGetCaptureProperty(cap, CV_CAP_PROP_FPS);
+
+	printf("%f\n", fps);
 
 }

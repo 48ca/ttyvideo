@@ -5,6 +5,7 @@
 char* filename;
 char* outfile;
 
+int error(char* message);
 int handle(int argc, char** argv);
 
 #endif // HANDLE_H

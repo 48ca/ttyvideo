@@ -1,6 +1,12 @@
 #include "handle.h"
 #include <stdio.h>
 
+int error(char* message) {
+
+	printf("%s: %s\n", "ttyvideo", message);
+
+}
+
 int handle(int argc, char** argv) {
 
 	switch(argc) {
@@ -10,8 +16,7 @@ int handle(int argc, char** argv) {
 			filename = argv[1];
 			break;
 		case(1):
-			printf("%s\n", "No input file specified.");
-			return 1;
+			return error("No input file specified");
 	}
 
 	return 0;
