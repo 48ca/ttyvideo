@@ -3,7 +3,6 @@
 #define HANDLE_H
 
 char* filename;
-char* outfile;
 
 int error(char* message);
 int handle(int argc, char** argv);
