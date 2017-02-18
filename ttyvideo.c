@@ -12,7 +12,7 @@
 
 #define NANO_CONV_FACTOR 1000000000
 
-#define COLOR_FORMAT "\e[38;05;%umA"
+#define COLOR_FORMAT "\e[38;05;%um%c"
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
@@ -54,6 +54,8 @@ int main(int argc, char** argv) {
 
 	int ansiColor;
 
+	unsigned char* data;
+
 	for(;;) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
@@ -70,9 +72,9 @@ int main(int argc, char** argv) {
 		step = frame->widthStep;
 
 		for(i = 0; i < tty_height; ++i) {
+			data = (unsigned char*)(frame->imageData + ((int)((float)i*height/tty_height)*step));
 			for(j = 0; j < tty_width; ++j) {
-				unsigned char* data = (unsigned char*)(frame->imageData + i*step*height/tty_height);
-				offset = j * nchannels * width / tty_width;
+				offset = (int)((float)j*width/tty_width) * nchannels;
 				b_ch = data[offset];
 				g_ch = data[offset+1];
 				r_ch = data[offset+2];
@@ -80,9 +82,11 @@ int main(int argc, char** argv) {
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
 				// printf("%u %u %u :: %u ", r_ch, g_ch, b_ch, ansiColor);
-				printf(COLOR_FORMAT, ansiColor);
+				printf(COLOR_FORMAT, ansiColor, 'C');
+				// printf("%u\n%u\n%u\n%u\n\n", r_ch*6/256, g_ch*6/256, b_ch*6/256, ansiColor);
 			}
 			printf("\n");
+			sleep(1);
 		}
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
@@ -117,5 +121,5 @@ int waitFrame(uint64_t delayNecessary, uint64_t delta_ns) {
 }
 
 unsigned char generateANSIColor(unsigned char r, unsigned char g, unsigned char b) {
-	return 16 + 36 * r*6/256 + 6 * g*6/256 + b*6/256;
+	return 16 + (36 * r*6/256) + (6 * g*6/256) + (b*6/256);
 }
