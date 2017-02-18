@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(ttyvideo)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 2 REQUIRED)
+add_library(handle STATIC handle.c)
 add_executable(ttyvideo ttyvideo.c)
-target_link_libraries(ttyvideo ${OpenCV_LIBS})
+target_link_libraries(ttyvideo ${OpenCV_LIBS} -lm handle -ldl)

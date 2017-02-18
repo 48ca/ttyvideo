@@ -1,6 +1,7 @@
 #include <opencv2/core/core_c.h>
 #include <opencv2/videoio/videoio_c.h>
 #include <opencv2/imgproc/imgproc_c.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "handle.h"

@@ -2,3 +2,7 @@ opencv/
 CMake*
 !CMakeLists.txt
 cmake_install.cmake
+*.a
+*.o
+*.so
+ttyvideo

@@ -123,6 +123,46 @@ ttyvideo/fast:
 	$(MAKE) -f CMakeFiles/ttyvideo.dir/build.make CMakeFiles/ttyvideo.dir/build
 .PHONY : ttyvideo/fast
 
+#=============================================================================
+# Target rules for targets named handle
+
+# Build rule for target.
+handle: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 handle
+.PHONY : handle
+
+# fast build rule for target.
+handle/fast:
+	$(MAKE) -f CMakeFiles/handle.dir/build.make CMakeFiles/handle.dir/build
+.PHONY : handle/fast
+
+handle.o: handle.c.o
+
+.PHONY : handle.o
+
+# target to build an object file
+handle.c.o:
+	$(MAKE) -f CMakeFiles/handle.dir/build.make CMakeFiles/handle.dir/handle.c.o
+.PHONY : handle.c.o
+
+handle.i: handle.c.i
+
+.PHONY : handle.i
+
+# target to preprocess a source file
+handle.c.i:
+	$(MAKE) -f CMakeFiles/handle.dir/build.make CMakeFiles/handle.dir/handle.c.i
+.PHONY : handle.c.i
+
+handle.s: handle.c.s
+
+.PHONY : handle.s
+
+# target to generate assembly for a file
+handle.c.s:
+	$(MAKE) -f CMakeFiles/handle.dir/build.make CMakeFiles/handle.dir/handle.c.s
+.PHONY : handle.c.s
+
 ttyvideo.o: ttyvideo.c.o
 
 .PHONY : ttyvideo.o
@@ -159,6 +199,10 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ttyvideo"
+	@echo "... handle"
+	@echo "... handle.o"
+	@echo "... handle.i"
+	@echo "... handle.s"
 	@echo "... ttyvideo.o"
 	@echo "... ttyvideo.i"
 	@echo "... ttyvideo.s"
