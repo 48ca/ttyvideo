@@ -1,0 +1,4 @@
+opencv/
+CMake*
+!CMakeLists.txt
+cmake_install.cmake

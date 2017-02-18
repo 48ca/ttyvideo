@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project(ttyvideo)
+find_package(OpenCV REQUIRED)
+add_executable(ttyvideo ttyvideo.c)
+target_link_libraries(ttyvideo ${OpenCV_LIBS})
