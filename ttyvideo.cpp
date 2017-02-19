@@ -1,5 +1,10 @@
-#include <opencv2/core/core_c.h>
-#include <opencv2/videoio/videoio_c.h>
+// #include <opencv2/core/core_c.h>
+// #include <opencv2/videoio/videoio_c.h>
+// #include <opencv2/videoio/videoio.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/video.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,8 +27,8 @@ int main(int argc, char** argv) {
 	argError = handle(argc, argv);
 	if(argError) return argError;
 
-	CvCapture* cap = cvCaptureFromFile(filename);
-	if(!cap) return error("Can't read input");
+	cv::VideoCapture cap(filename);
+	if(!cap.isOpened()) return error((char*)"Can't read input");
 
 	//
 
@@ -40,16 +45,16 @@ int main(int argc, char** argv) {
 	register int i, j;
 	register unsigned char r_ch, b_ch, g_ch;
 
-	double fps = (double)cvGetCaptureProperty(cap, CV_CAP_PROP_FPS);
+	double fps = cap.get(CV_CAP_PROP_FPS);
 
 	register int frameNum = 0;
 
-	IplImage* frame;
+	cv::Mat frame;
 
 	struct timespec start, end;
 
 	uint64_t delta_ns;
-	uint64_t delayNecessary = fps == 0 ? NANO_CONV_FACTOR/fps : 0;
+	uint64_t delayNecessary = fps == 0.0 ? 0 : NANO_CONV_FACTOR/fps;
 
 	int ansiColor;
 
@@ -62,30 +67,34 @@ int main(int argc, char** argv) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
-		if(frame) {
+		if(!frame.empty()) {
 
-			frame = cvQueryFrame(cap);
+			cap >> frame;
 
-			if(!frame) break;
+			if(frame.empty()) break;
 
 			for(i = 0; i < tty_height - 1; ++i)
 				printf("\x1B[F");
 
 		} else {
 
-			frame = cvQueryFrame(cap);
+			cap >> frame;
 
-			if(!frame) break;
+			if(frame.empty()) break;
 
 		}
 
-		width = frame->width;
-		height = frame->height;
-		nchannels = frame->nChannels;
-		step = frame->widthStep;
+		if(frame.depth() != CV_8U) {
+			return error((char*)"Frame has incorrect depth");
+		}
+
+		width = frame.cols;
+		height = frame.rows;
+		nchannels = frame.channels();
+		step = width * nchannels;
 
 		for(i = 0; i < tty_height; ++i) {
-			data = (unsigned char*)(frame->imageData + ((int)((float)i*height/tty_height)*step));
+			data = (unsigned char*)(frame.data + ((int)((float)i*height/tty_height)*step));
 			for(j = 0; j < tty_width; ++j) {
 				offset = (int)((float)j*width/tty_width) * nchannels;
 				b_ch = data[offset];
@@ -95,7 +104,6 @@ int main(int argc, char** argv) {
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
 				printf(COLOR_FORMAT, ansiColor);
-
 			}
 			if(i < tty_height - 1)
 				printf("\n");
@@ -141,6 +149,6 @@ int waitFrame(uint64_t delayNecessary, uint64_t delta_ns) {
 
 unsigned char generateANSIColor(unsigned char r, unsigned char g, unsigned char b) {
 
-	return 16 + (36 * lround(r * 5.0/256)) + (6 * lround(g*5.0/256)) + lround(b*5.0/256);
+	return 16 + (36 * lround(r*5.0/256)) + (6 * lround(g*5.0/256)) + lround(b*5.0/256);
 
 }
