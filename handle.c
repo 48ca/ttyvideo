@@ -1,5 +1,6 @@
 #include "handle.h"
 #include <stdio.h>
+#include <signal.h>
 
 int error(char* message) {
 
@@ -26,4 +27,9 @@ int handle(int argc, char** argv) {
 
 	return 0;
 
+}
+
+void sig_handler(int signo) {
+	if(signo == SIGINT)
+		terminate = 1;
 }

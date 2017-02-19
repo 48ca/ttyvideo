@@ -9,6 +9,7 @@
 #include <sys/ioctl.h>
 #include <time.h>
 #include <unistd.h>
+#include <signal.h>
 
 #define NANO_CONV_FACTOR 1000000000
 
@@ -56,6 +57,9 @@ int main(int argc, char** argv) {
 
 	unsigned char* data;
 
+	signal(SIGINT, sig_handler);
+	terminate = 0;
+
 	for(;;) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
@@ -66,7 +70,7 @@ int main(int argc, char** argv) {
 
 			if(!frame) break;
 
-			for(i = 0; i < tty_height; ++i)
+			for(i = 0; i < tty_height - 1; ++i)
 				printf("\x1B[F");
 
 		} else {
@@ -100,6 +104,11 @@ int main(int argc, char** argv) {
 				fflush(stdout);
 		}
 
+		if(terminate) {
+			system("clear");
+			break;
+		}
+
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
 		delta_ns = (end.tv_sec - start.tv_sec) * NANO_CONV_FACTOR + (end.tv_nsec - start.tv_nsec);
@@ -109,8 +118,6 @@ int main(int argc, char** argv) {
 		frameNum++;
 
 	}
-
-	cvReleaseImage(&frame);
 
 	return 0;
 
