@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
 				printf(COLOR_FORMAT, ansiColor);
+
 			}
 			if(i < tty_height - 1)
 				printf("\n");
@@ -140,6 +141,6 @@ int waitFrame(uint64_t delayNecessary, uint64_t delta_ns) {
 
 unsigned char generateANSIColor(unsigned char r, unsigned char g, unsigned char b) {
 
-	return 16 + (36 * r*6/256) + (6 * g*6/256) + (b*6/256);
+	return 16 + (36 * lround(r * 5.0/256)) + (6 * lround(g*5.0/256)) + lround(b*5.0/256);
 
 }
