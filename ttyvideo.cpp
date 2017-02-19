@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 	struct timespec start, end;
 
 	uint64_t delta_ns;
-	uint64_t delayNecessary = fps == 0.0 ? 0 : NANO_CONV_FACTOR/fps;
+	uint64_t delayNecessary = fps == 0 || isnan(fps) ? 0 : NANO_CONV_FACTOR/fps;
 
 	int ansiColor;
 
