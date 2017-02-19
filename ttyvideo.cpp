@@ -20,6 +20,10 @@
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
+void getTTYDims();
+
+int tty_width;
+int tty_height;
 
 int main(int argc, char** argv) {
 
@@ -30,16 +34,7 @@ int main(int argc, char** argv) {
 	cv::VideoCapture cap(filename);
 	if(!cap.isOpened()) return error((char*)"Can't read input");
 
-	//
-
-	int tty_width, tty_height;
-
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	tty_width = w.ws_col;
-	tty_height = w.ws_row;
-
-	//
+	getTTYDims();
 
 	register int width, height, nchannels, step, offset;
 	register int i, j;
@@ -92,6 +87,8 @@ int main(int argc, char** argv) {
 		height = frame.rows;
 		nchannels = frame.channels();
 		step = width * nchannels;
+
+		getTTYDims();
 
 		for(i = 0; i < tty_height; ++i) {
 			data = (unsigned char*)(frame.data + ((int)((float)i*height/tty_height)*step));
@@ -150,5 +147,14 @@ int waitFrame(uint64_t delayNecessary, uint64_t delta_ns) {
 unsigned char generateANSIColor(unsigned char r, unsigned char g, unsigned char b) {
 
 	return 16 + (36 * lround(r*5.0/256)) + (6 * lround(g*5.0/256)) + lround(b*5.0/256);
+
+}
+
+void getTTYDims() {
+
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	tty_width = w.ws_col;
+	tty_height = w.ws_row;
 
 }
