@@ -4,3 +4,5 @@ find_package(OpenCV 2 REQUIRED)
 add_library(handle STATIC handle.c)
 add_executable(ttyvideo ttyvideo.c)
 target_link_libraries(ttyvideo ${OpenCV_LIBS} -lm handle)
+
+install(TARGETS ttyvideo RUNTIME DESTINATION bin)
