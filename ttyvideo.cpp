@@ -16,7 +16,7 @@
 
 #define NANO_CONV_FACTOR 1000000000
 
-#define COLOR_FORMAT "\e[48;05;%um "
+#define COLOR_FORMAT "\x1B[48;05;%um "
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
