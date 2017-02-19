@@ -102,10 +102,12 @@ int main(int argc, char** argv) {
 
 				printf(COLOR_FORMAT, ansiColor);
 			}
-			if(i < tty_height - 1)
+			if(i < tty_height - 1) {
 				printf("\n");
-			else
+			} else {
+				printf("\x1B[m");
 				fflush(stdout);
+			}
 		}
 
 		if(terminate) {
