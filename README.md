@@ -16,5 +16,6 @@ sudo make install
 ```
 
 ## How it works
+ttyvideo works with most visual media types: videos, images, GIFs, etc. This is due to the usage of OpenCV to read media.  
 Right now, ttyvideo doesn't do anything special when rendering videos.  
 ttyvideo will scale any video to fit the aspect ratio of the terminal it's running in. ttyvideo also does not perform any smoothing operations; each character slot in the terminal corresponds to exactly one pixel in the source video, not a combination of them. Feel free to add smoothing ttyvideo!
