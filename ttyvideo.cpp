@@ -55,6 +55,8 @@ int main(int argc, char** argv) {
 
 	unsigned char* data;
 
+	setvbuf(stdout, NULL, _IOFBF, 0);
+
 	signal(SIGINT, sig_handler);
 	terminate = 0;
 
@@ -111,7 +113,8 @@ int main(int argc, char** argv) {
 		}
 
 		if(terminate) {
-			system("reset");
+			// Wait for 10 milliseconds to let stdout finish its business
+			waitFrame(10000, 0);
 			break;
 		}
 
