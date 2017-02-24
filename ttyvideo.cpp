@@ -25,12 +25,31 @@ void getTTYDims();
 int tty_width;
 int tty_height;
 
+#define C (char*)
+
 int main(int argc, char** argv) {
+
+	// char* filename = (char*)setDefaultArgument("Input file");
+	int* width_option   = (int*)addArgument(C"Output width", TAKES_ONE_ARGUMENT, C"-w", C"--width");
+	printf("Allocated one\n");
+	int* height_option  = (int*)addArgument(C"Output height", TAKES_ONE_ARGUMENT, C"-h", C"--height");
+	int* sleep_option   = (int*)addArgument(C"Add a pause between loops or after plays (seconds)", TAKES_ONE_ARGUMENT, C"-s", C"--sleep");
+	int* pause_option   = (int*)addArgument(C"Add a pause between loops or after plays (ms)", TAKES_ONE_ARGUMENT, C"-p", C"--pause");
+	int* noexit_option  = (int*)addArgument(C"Prevent the program for exiting", TAKES_NO_ARGUMENTS, C"--no-exit", NULL);
+	int* loop_option    = (int*)addArgument(C"Loop videos", TAKES_NO_ARGUMENTS, C"-l", C"--loop");
+	int* help_option    = (int*)addArgument(C"Print usage", TAKES_NO_ARGUMENTS, C"--help", NULL);
+	int* nointer_option = (int*)addArgument(C"No interrupts", TAKES_NO_ARGUMENTS, C"--no-interrupts", NULL);
+
+	printf("Allocated all\n");
 
 	int argError;
 	argError = handle(argc, argv);
-	if(argError) return argError;
+	if(argError) {
+		// printUsage();
+		return argError;
+	}
 
+	char* filename = "memes";
 	cv::VideoCapture cap(filename);
 	if(!cap.isOpened()) return error((char*)"Can't read input");
 
