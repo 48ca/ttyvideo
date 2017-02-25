@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 	int argError;
 	argError = handle(argc, argv);
 	if(argError) {
-		printUsage();
+		error((char*)"Run ttyvideo --help for more information");
 		return argError;
 	}
 
