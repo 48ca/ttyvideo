@@ -28,6 +28,8 @@ int tty_height;
 int tty_width_custom = 0;
 int tty_height_custom = 0;
 
+int no_interrupts = 0;
+
 #define C (char*)
 
 int main(int argc, char** argv) {
@@ -79,24 +81,26 @@ int main(int argc, char** argv) {
 
 	setvbuf(stdout, NULL, _IOFBF, 0);
 
-	if(nointer_option[0] == '\0')
-		signal(SIGINT, sig_handler);
+	signal(SIGINT, sig_handler);
+
+	no_interrupts = nointer_option[0] == '\0' ? 0 : 1;
 
 	register int frameNum = 0;
 	do {
 		frameNum = play(filename, fps_option, frameNum);
+
+		if(terminate && !no_interrupts) {
+			printf("\n");
+			fflush(stdout);
+			return 0;
+		}
+
+		if(pause_time)
+			waitFrame(1000 * pause_time, 0);
+		if(sleep_time)
+			sleep(sleep_time);
+
 	} while(loop && frameNum > 1);
-
-	if(terminate) {
-		printf("\n");
-		fflush(stdout);
-		return 0;
-	}
-
-	if(pause_time)
-		waitFrame(1000 * pause_time, 0);
-	if(sleep_time)
-		sleep(sleep_time);
 
 	if(noexit)
 		while(1)
@@ -178,7 +182,7 @@ int play(char* filename, char* fps_option, int subsequentPlay) {
 			}
 		}
 
-		if(terminate) {
+		if(terminate && !no_interrupts) {
 			// Wait for 10 milliseconds to let stdout finish its business
 			waitFrame(10000, 0);
 			break;
