@@ -89,6 +89,9 @@ int main(int argc, char** argv) {
 	do {
 		frameNum = play(filename, string_option, fps_option, frameNum);
 
+		if(frameNum < 0)
+			return 1;
+
 		if(terminate && !no_interrupts) {
 			printf("\n");
 			fflush(stdout);
@@ -112,7 +115,7 @@ int main(int argc, char** argv) {
 
 int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 	cv::VideoCapture cap(filename);
-	if(!cap.isOpened()) return error((char*)"Can't read input");
+	if(!cap.isOpened()) return -1 * error((char*)"Can't read input");
 
 	double fps = fps_option[0] == '\0' ? cap.get(CV_CAP_PROP_FPS) : atof(fps_option);
 
@@ -154,7 +157,7 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 		}
 
 		if(frame.depth() != CV_8U) {
-			return error((char*)"Frame has incorrect depth");
+			return -1 * error((char*)"Frame has incorrect depth");
 		}
 
 		width = frame.cols;
