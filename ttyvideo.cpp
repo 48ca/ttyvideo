@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
 	char* width_option   = addArgument(C"Output width", TAKES_ONE_ARGUMENT, C"-w", C"--width");
 	char* height_option  = addArgument(C"Output height", TAKES_ONE_ARGUMENT, C"-h", C"--height");
 	char* sleep_option   = addArgument(C"Add a pause between loops or after plays (seconds)", TAKES_ONE_ARGUMENT, C"-s", C"--sleep");
-	char* pause_option   = addArgument(C"Add a pause between loops or after plays (ms)", TAKES_ONE_ARGUMENT, C"-p", C"--pause");
 	char* noexit_option  = addArgument(C"Prevent the program for exiting", TAKES_NO_ARGUMENTS, C"--no-exit", NULL);
 	char* loop_option    = addArgument(C"Loop videos", TAKES_NO_ARGUMENTS, C"-l", C"--loop");
 	char* help_option    = addArgument(C"Print usage", TAKES_NO_ARGUMENTS, C"--help", NULL);
@@ -75,7 +74,6 @@ int main(int argc, char** argv) {
 	getTTYDims(); // get real dims -- including user specification
 
 	int sleep_time = sleep_option[0] == '\0' ? 0 : atoi(sleep_option);
-	int pause_time = pause_option[0] == '\0' ? 0 : atoi(pause_option);
 
 	int noexit = noexit_option[0] == '\0' ? 0 : 1;
 
@@ -97,8 +95,6 @@ int main(int argc, char** argv) {
 			return 0;
 		}
 
-		if(pause_time)
-			waitFrame(1000 * pause_time, 0);
 		if(sleep_time)
 			sleep(sleep_time);
 
