@@ -79,12 +79,29 @@ char* addArgument(char* helpText, int numArguments, char* firstCall, char* secon
 	argumentMemStore[argumentAccessLocation] = argumentMemLocation;
 	argumentNumStore[argumentAccessLocation] = numArguments;
 
-	helpMessages[numUniqueOptionsSpecified] = (char*)malloc(sizeof(char) * strlen(helpText));
-	strcpy(helpMessages[numUniqueOptionsSpecified++], helpText);
 
 	if(secondCall == NULL) {
+
+		helpMessages[numUniqueOptionsSpecified] = (char*)malloc(sizeof(char) * (strlen(helpText) + strlen(firstCall) + 4));
+
+		strcpy(helpMessages[numUniqueOptionsSpecified], firstCall);
+		strcat(helpMessages[numUniqueOptionsSpecified], ":   ");
+		strcat(helpMessages[numUniqueOptionsSpecified], helpText);
+
+		numUniqueOptionsSpecified++;
+
 		return argumentMemLocation;
 	}
+
+	helpMessages[numUniqueOptionsSpecified] = (char*)malloc(sizeof(char) * (strlen(helpText) + strlen(firstCall) + 2 + 4 + strlen(secondCall)));
+
+	strcpy(helpMessages[numUniqueOptionsSpecified], firstCall);
+	strcat(helpMessages[numUniqueOptionsSpecified], ", ");
+	strcat(helpMessages[numUniqueOptionsSpecified], secondCall);
+	strcat(helpMessages[numUniqueOptionsSpecified], ":   ");
+	strcat(helpMessages[numUniqueOptionsSpecified], helpText);
+
+	numUniqueOptionsSpecified++;
 
 	argumentAccessLocation = numOptionsSpecified++;
 	argumentCallMap[argumentAccessLocation] = (char*)malloc(sizeof(char) * strlen(secondCall));
@@ -99,7 +116,6 @@ void printUsage() {
 
 	if(helpMessages != NULL) {
 		register int i;
-		register int j;
 		for(i = 0; i < numUniqueOptionsSpecified; ++i) {
 			printf("%s\n", helpMessages[i]);
 		}
