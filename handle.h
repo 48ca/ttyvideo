@@ -7,7 +7,9 @@ extern "C" {
 
 char* filename;
 
-void* addArgument(char* helpText, int numArguments, char* firstCall, char* secondCall);
+char* setDefaultArgument(char* helpText);
+
+char* addArgument(char* helpText, int numArguments, char* firstCall, char* secondCall);
 
 void printUsage();
 

@@ -24,51 +24,65 @@ void getTTYDims();
 
 int tty_width;
 int tty_height;
+int tty_width_custom = 0;
+int tty_height_custom = 0;
 
 #define C (char*)
 
 int main(int argc, char** argv) {
 
-	// char* filename = (char*)setDefaultArgument("Input file");
-	int* width_option   = (int*)addArgument(C"Output width", TAKES_ONE_ARGUMENT, C"-w", C"--width");
-	printf("Allocated one\n");
-	int* height_option  = (int*)addArgument(C"Output height", TAKES_ONE_ARGUMENT, C"-h", C"--height");
-	int* sleep_option   = (int*)addArgument(C"Add a pause between loops or after plays (seconds)", TAKES_ONE_ARGUMENT, C"-s", C"--sleep");
-	int* pause_option   = (int*)addArgument(C"Add a pause between loops or after plays (ms)", TAKES_ONE_ARGUMENT, C"-p", C"--pause");
-	int* noexit_option  = (int*)addArgument(C"Prevent the program for exiting", TAKES_NO_ARGUMENTS, C"--no-exit", NULL);
-	int* loop_option    = (int*)addArgument(C"Loop videos", TAKES_NO_ARGUMENTS, C"-l", C"--loop");
-	int* help_option    = (int*)addArgument(C"Print usage", TAKES_NO_ARGUMENTS, C"--help", NULL);
-	int* nointer_option = (int*)addArgument(C"No interrupts", TAKES_NO_ARGUMENTS, C"--no-interrupts", NULL);
-
-	printf("Allocated all\n");
+	char* filename       = setDefaultArgument(C"infile");
+	char* width_option   = addArgument(C"Output width", TAKES_ONE_ARGUMENT, C"-w", C"--width");
+	char* height_option  = addArgument(C"Output height", TAKES_ONE_ARGUMENT, C"-h", C"--height");
+	char* sleep_option   = addArgument(C"Add a pause between loops or after plays (seconds)", TAKES_ONE_ARGUMENT, C"-s", C"--sleep");
+	char* pause_option   = addArgument(C"Add a pause between loops or after plays (ms)", TAKES_ONE_ARGUMENT, C"-p", C"--pause");
+	char* noexit_option  = addArgument(C"Prevent the program for exiting", TAKES_NO_ARGUMENTS, C"--no-exit", NULL);
+	char* loop_option    = addArgument(C"Loop videos", TAKES_NO_ARGUMENTS, C"-l", C"--loop");
+	char* help_option    = addArgument(C"Print usage", TAKES_NO_ARGUMENTS, C"--help", NULL);
+	char* nointer_option = addArgument(C"No interrupts", TAKES_NO_ARGUMENTS, C"--no-interrupts", NULL);
+	char* fps_option     = addArgument(C"FPS", TAKES_ONE_ARGUMENT, C"--fps", NULL);
 
 	int argError;
 	argError = handle(argc, argv);
 	if(argError) {
-		// printUsage();
+		printUsage();
 		return argError;
 	}
 
-	char* filename = "memes";
-	cv::VideoCapture cap(filename);
-	if(!cap.isOpened()) return error((char*)"Can't read input");
+	if(help_option[0] != '\0') {
+		printUsage();
+		return 0;
+	}
 
-	getTTYDims();
+	if(filename[0] == '\0')
+		return error((char*)"No input file specified");
+
+	getTTYDims(); // get initial dims
+
+	tty_height_custom = atoi(height_option);
+	tty_width_custom = atoi(width_option);
+
+	if(tty_height_custom > tty_height || tty_width_custom > tty_width) {
+		error((char*)"The specified dimensions are too large, but we will play the video anyway");
+		sleep(1);
+	}
+
+	getTTYDims(); // get real dims -- including user specification
 
 	register int width, height, nchannels, step, offset;
 	register int i, j;
 	register unsigned char r_ch, b_ch, g_ch;
 
-	double fps = cap.get(CV_CAP_PROP_FPS);
+	int sleep_time = sleep_option[0] == '\0' ? 0 : atoi(sleep_option);
+	int pause_time = pause_option[0] == '\0' ? 0 : atoi(pause_option);
 
-	register int frameNum = 0;
+	int noexit = noexit_option[0] == '\0' ? 0 : 1;
+
+	int loop = loop_option[0] == '\0' ? 0 : 1;
 
 	cv::Mat frame;
 
 	struct timespec start, end;
-
-	uint64_t delta_ns;
-	uint64_t delayNecessary = fps == 0 || isnan(fps) ? 0 : NANO_CONV_FACTOR/fps;
 
 	int ansiColor;
 
@@ -76,8 +90,21 @@ int main(int argc, char** argv) {
 
 	setvbuf(stdout, NULL, _IOFBF, 0);
 
-	signal(SIGINT, sig_handler);
+	if(nointer_option[0] == '\0')
+		signal(SIGINT, sig_handler);
+
 	terminate = 0;
+
+beginMediaRead:
+	cv::VideoCapture cap(filename);
+	if(!cap.isOpened()) return error((char*)"Can't read input");
+
+	double fps = fps_option[0] == '\0' ? cap.get(CV_CAP_PROP_FPS) : atof(fps_option);
+
+	uint64_t delta_ns;
+	uint64_t delayNecessary = fps == 0 || isnan(fps) ? 0 : NANO_CONV_FACTOR/fps;
+
+	register int frameNum = 0;
 
 	for(;;) {
 
@@ -147,6 +174,21 @@ int main(int argc, char** argv) {
 
 	}
 
+	if(terminate)
+		return 0;
+
+	if(pause_time)
+		waitFrame(1000 * pause_time, 0);
+	if(sleep_time)
+		sleep(sleep_time);
+
+	if(loop && frameNum > 1)
+		goto beginMediaRead;
+
+	if(noexit)
+		while(1)
+			sleep(60);
+
 	return 0;
 
 }
@@ -178,7 +220,7 @@ void getTTYDims() {
 
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	tty_width = w.ws_col;
-	tty_height = w.ws_row;
+	tty_width = tty_width_custom > 0 ? tty_width_custom : w.ws_col;
+	tty_height = tty_height_custom > 0 ? tty_height_custom : w.ws_row;
 
 }

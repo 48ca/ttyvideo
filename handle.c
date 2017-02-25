@@ -1,28 +1,149 @@
 #include "handle.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <signal.h>
 
 int error(char* message) {
 
-	printf("%s: %s\n", "ttyvideo", message);
+	fprintf(stderr, "%s: %s\n", "ttyvideo", message);
 
 	return 1;
 
 }
 
-int handle(int argc, char** argv) {
+static int numOptionsSpecified = 0;
+static int numUniqueOptionsSpecified = 0;
+static char** argumentCallMap = NULL;
+static char** argumentMemStore = NULL;
+static int*   argumentNumStore = NULL;
+static char** helpMessages = NULL;
+static char* defaultArg = NULL;
+static char* defaultArgHelp = NULL;
 
-	if(argc >= 3) {
-		printf("usage: ttyvideo <infile>\n");
-		return 2;
+#define MAX_ARG_SIZE 200
+
+char* setDefaultArgument(char* helpText) {
+
+	defaultArg = (char*)malloc(sizeof(char) * MAX_ARG_SIZE);
+	defaultArgHelp = (char*)malloc(sizeof(char) * strlen(helpText));
+	strcpy(defaultArgHelp, helpText);
+
+	defaultArg[0] = '\0';
+
+	return defaultArg;
+
+}
+
+#define MAX_ACCESS_MAP_SIZE 100
+#define MAX_HELP_MESSAGE_ARRAY_SIZE 100
+
+char* addArgument(char* helpText, int numArguments, char* firstCall, char* secondCall) {
+
+	if(firstCall == NULL) {
+		fprintf(stderr, "No option specified for parameter\n");
+		return NULL;
+	}
+	if(firstCall[0] != '-') {
+		fprintf(stderr, "Option '%s' does not start with a '-'\n", firstCall);
+		return NULL;
+	}
+	if(secondCall != NULL && secondCall[0] != '-') {
+		fprintf(stderr, "Option '%s' does not start with a '-'\n", secondCall);
 	}
 
-	switch(argc) {
-		case(2):
-			filename = argv[1];
+	if(argumentCallMap == NULL) {
+		argumentCallMap = (char**)malloc(sizeof(char*) * MAX_ACCESS_MAP_SIZE);
+	}
+	if(argumentMemStore == NULL) {
+		argumentMemStore = (char**)malloc(sizeof(char*) * MAX_ACCESS_MAP_SIZE);
+	}
+	if(argumentNumStore == NULL) {
+		argumentNumStore = (int*)malloc(sizeof(int*) * MAX_ACCESS_MAP_SIZE);
+	}
+	if(helpMessages == NULL) {
+		helpMessages = (char**)malloc(sizeof(char*) * MAX_HELP_MESSAGE_ARRAY_SIZE);
+	}
+
+	// TODO: Add ability to allocate lots of these
+	char* argumentMemLocation = (char*)malloc(sizeof(char));
+	if(argumentMemLocation == NULL) {
+		fprintf(stderr, "Couldn't allocate memory to store argument to pass to %s", firstCall);
+		return NULL;
+	}
+	argumentMemLocation[0] = '\0';
+
+	int argumentAccessLocation = numOptionsSpecified++;
+	argumentCallMap[argumentAccessLocation] = (char*)malloc(sizeof(char) * strlen(firstCall));
+	strcpy(argumentCallMap[argumentAccessLocation], firstCall);
+	argumentMemStore[argumentAccessLocation] = argumentMemLocation;
+	argumentNumStore[argumentAccessLocation] = numArguments;
+
+	helpMessages[numUniqueOptionsSpecified] = (char*)malloc(sizeof(char) * strlen(helpText));
+	strcpy(helpMessages[numUniqueOptionsSpecified++], helpText);
+
+	if(secondCall == NULL) {
+		return argumentMemLocation;
+	}
+
+	argumentAccessLocation = numOptionsSpecified++;
+	argumentCallMap[argumentAccessLocation] = (char*)malloc(sizeof(char) * strlen(secondCall));
+	strcpy(argumentCallMap[argumentAccessLocation], secondCall);
+	argumentMemStore[argumentAccessLocation] = argumentMemLocation;
+	argumentNumStore[argumentAccessLocation] = numArguments;
+
+	return argumentMemLocation;
+}
+
+void printUsage() {
+
+	if(helpMessages != NULL) {
+		register int i;
+		register int j;
+		for(i = 0; i < numUniqueOptionsSpecified; ++i) {
+			printf("%s\n", helpMessages[i]);
+		}
+	}
+
+}
+
+int handle(int argc, char** argv) {
+
+	register int i, j;
+	int numArguments;
+	for(i = 1; i < argc; ++i) {
+		for(j = 0; j < numOptionsSpecified; ++j) {
+			if(argv[i][0] != '-') {
+				if(defaultArg == NULL) {
+					fprintf(stderr, "Argument '%s' was passed without an option, and no default argument has been set\n", argv[0]);
+					return 1;
+				}
+				if(defaultArg[0] != '\0') {
+					fprintf(stderr, "Unrecognized option '%s'\n", argv[i]);
+					return 1;
+				}
+				strcpy(defaultArg, argv[i]);
+				break;
+			}
+			if(strcmp(argv[i], argumentCallMap[j]))
+				continue;
+			numArguments = argumentNumStore[j];
+			if(numArguments) {
+				if(i < argc - 1)
+					strcpy(argumentMemStore[j], argv[++i]);
+				else {
+					fprintf(stderr, "Option '%s' requires an argument\n", argv[i]);
+					return 1;
+				}
+			}
+			else
+				strcpy(argumentMemStore[j], "1"); // The option is present
 			break;
-		case(1):
-			return error("No input file specified");
+		}
+		if(j == numOptionsSpecified) {
+			fprintf(stderr, "Unrecognized option '%s'\n", argv[i]);
+			return 1;
+		}
 	}
 
 	return 0;
