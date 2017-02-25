@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
 
 	} while(loop && frameNum > 1);
 
-	if(noexit)
-		while(1)
+	if((loop && frameNum == 1) || noexit)
+		while(!terminate || no_interrupts)
 			sleep(60);
 
 	return 0;
