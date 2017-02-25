@@ -16,12 +16,12 @@
 
 #define NANO_CONV_FACTOR 1000000000
 
-#define COLOR_FORMAT "\x1B[48;05;%um "
+#define COLOR_FORMAT "\x1B[48;05;%um%c"
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
 void getTTYDims();
-int play(char*, char*, int);
+int play(char*, char*, char*, int);
 
 int tty_width;
 int tty_height;
@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
 	char* help_option    = addArgument(C"Print usage", TAKES_NO_ARGUMENTS, C"--help", NULL);
 	char* nointer_option = addArgument(C"No interrupts", TAKES_NO_ARGUMENTS, C"--no-interrupts", NULL);
 	char* fps_option     = addArgument(C"FPS", TAKES_ONE_ARGUMENT, C"--fps", NULL);
+	char* string_option  = addArgument(C"String to place in the foreground", TAKES_ONE_ARGUMENT, C"--string", NULL);
 
 	int argError;
 	argError = handle(argc, argv);
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
 
 	register int frameNum = 0;
 	do {
-		frameNum = play(filename, fps_option, frameNum);
+		frameNum = play(filename, string_option, fps_option, frameNum);
 
 		if(terminate && !no_interrupts) {
 			printf("\n");
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
 
 }
 
-int play(char* filename, char* fps_option, int subsequentPlay) {
+int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 	cv::VideoCapture cap(filename);
 	if(!cap.isOpened()) return error((char*)"Can't read input");
 
@@ -129,6 +130,8 @@ int play(char* filename, char* fps_option, int subsequentPlay) {
 	cv::Mat frame;
 	int ansiColor;
 	unsigned char* data;
+
+	int stringLength = strlen(string);
 
 	for(;;) {
 
@@ -162,6 +165,8 @@ int play(char* filename, char* fps_option, int subsequentPlay) {
 
 		getTTYDims();
 
+		register int stringIter = 0;
+
 		for(i = 0; i < tty_height; ++i) {
 			data = (unsigned char*)(frame.data + ((int)((float)i*height/tty_height)*step));
 			for(j = 0; j < tty_width; ++j) {
@@ -172,7 +177,7 @@ int play(char* filename, char* fps_option, int subsequentPlay) {
 
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
-				printf(COLOR_FORMAT, ansiColor);
+				printf(COLOR_FORMAT, ansiColor, stringLength ? string[stringIter++%stringLength] : ' ');
 			}
 			if(i < tty_height - 1) {
 				printf("\n");
