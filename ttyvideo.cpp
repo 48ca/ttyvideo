@@ -17,6 +17,7 @@
 #define NANO_CONV_FACTOR 1000000000
 
 #define COLOR_FORMAT "\x1B[48;05;%um%c"
+#define COLOR_RESET "\x1B[0m"
 
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
@@ -107,6 +108,8 @@ int main(int argc, char** argv) {
 		while(!terminate || no_interrupts)
 			sleep(60);
 
+	printf("\n");
+	fflush(stdout);
 	return 0;
 
 }
@@ -179,6 +182,7 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 
 				printf(COLOR_FORMAT, ansiColor, stringLength ? string[stringIter++%stringLength] : ' ');
 			}
+			printf(COLOR_RESET);
 			if(i < tty_height - 1) {
 				printf("\n");
 			} else {

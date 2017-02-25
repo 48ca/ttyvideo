@@ -129,9 +129,9 @@ int handle(int argc, char** argv) {
 				continue;
 			numArguments = argumentNumStore[j];
 			if(numArguments) {
-				if(i < argc - 1)
+				if(i < argc - 1 && argv[i+1][0] != '-') {
 					strcpy(argumentMemStore[j], argv[++i]);
-				else {
+				} else {
 					fprintf(stderr, "Option '%s' requires an argument\n", argv[i]);
 					return 1;
 				}
