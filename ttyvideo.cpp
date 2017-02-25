@@ -188,8 +188,8 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 		}
 
 		if(terminate && !no_interrupts) {
-			// Wait for 10 milliseconds to let stdout finish its business
-			waitFrame(10000, 0);
+			// Wait some milliseconds to let stdout finish its business
+			waitFrame(80000, 0);
 			break;
 		}
 
