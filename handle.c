@@ -85,7 +85,7 @@ char* addArgument(char* helpText, int numArguments, char* firstCall, char* secon
 		helpMessages[numUniqueOptionsSpecified] = (char*)malloc(sizeof(char) * (strlen(helpText) + strlen(firstCall) + 4));
 
 		strcpy(helpMessages[numUniqueOptionsSpecified], firstCall);
-		strcat(helpMessages[numUniqueOptionsSpecified], ":   ");
+		strcat(helpMessages[numUniqueOptionsSpecified], ":\t");
 		strcat(helpMessages[numUniqueOptionsSpecified], helpText);
 
 		numUniqueOptionsSpecified++;
@@ -98,7 +98,7 @@ char* addArgument(char* helpText, int numArguments, char* firstCall, char* secon
 	strcpy(helpMessages[numUniqueOptionsSpecified], firstCall);
 	strcat(helpMessages[numUniqueOptionsSpecified], ", ");
 	strcat(helpMessages[numUniqueOptionsSpecified], secondCall);
-	strcat(helpMessages[numUniqueOptionsSpecified], ":   ");
+	strcat(helpMessages[numUniqueOptionsSpecified], ":\t");
 	strcat(helpMessages[numUniqueOptionsSpecified], helpText);
 
 	numUniqueOptionsSpecified++;
@@ -119,6 +119,8 @@ void printUsage() {
 		for(i = 0; i < numUniqueOptionsSpecified; ++i) {
 			printf("%s\n", helpMessages[i]);
 		}
+	} else {
+		printf("No options to display\n");
 	}
 
 }

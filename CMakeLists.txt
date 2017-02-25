@@ -3,7 +3,7 @@ project(ttyvideo)
 find_package(OpenCV REQUIRED)
 
 if(MSVC)
-	# Visual Studio -- \W4
+	# Visual Studio -- /W4
 	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 		string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	else()
@@ -18,4 +18,4 @@ add_library(handle STATIC handle.c)
 add_executable(ttyvideo ttyvideo.cpp)
 target_link_libraries(ttyvideo ${OpenCV_LIBS} -lm handle)
 
-install(TARGETS ttyvideo RUNTIME DESTINATION bin)
+install(TARGETS ttyvideo DESTINATION bin)

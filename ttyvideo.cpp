@@ -16,7 +16,8 @@
 
 #define NANO_CONV_FACTOR 1000000000
 
-#define COLOR_FORMAT "\x1B[48;05;%um%c"
+#define COLOR_TEXT_FORMAT "\x1B[48;05;%um\x1B[38;05;%um%c"
+#define COLOR_FORMAT "\x1B[48;05;%um "
 #define COLOR_RESET "\x1B[0m"
 
 int waitFrame(uint64_t, uint64_t);
@@ -130,7 +131,7 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 	register int i, j;
 	register unsigned char r_ch, b_ch, g_ch;
 	cv::Mat frame;
-	int ansiColor;
+	int ansiColor, ansiTextColor;
 	unsigned char* data;
 
 	int stringLength = strlen(string);
@@ -179,7 +180,14 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 
 				ansiColor = generateANSIColor(r_ch, g_ch, b_ch);
 
-				printf(COLOR_FORMAT, ansiColor, stringLength ? string[stringIter++%stringLength] : ' ');
+				if(stringLength) {
+					ansiTextColor = b_ch + g_ch + r_ch > 0x17F ? generateANSIColor(r_ch - 50, g_ch - 50, b_ch - 50) :
+						generateANSIColor(r_ch + 50, g_ch + 50, b_ch + 50);
+
+					printf(COLOR_TEXT_FORMAT, ansiColor, ansiTextColor, string[stringIter++%stringLength]);
+				} else {
+					printf(COLOR_FORMAT, ansiColor);
+				}
 			}
 			printf(COLOR_RESET);
 			if(i < tty_height - 1) {
