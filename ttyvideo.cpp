@@ -21,6 +21,7 @@
 int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
 void getTTYDims();
+int play(char*, char*, int);
 
 int tty_width;
 int tty_height;
@@ -69,10 +70,6 @@ int main(int argc, char** argv) {
 
 	getTTYDims(); // get real dims -- including user specification
 
-	register int width, height, nchannels, step, offset;
-	register int i, j;
-	register unsigned char r_ch, b_ch, g_ch;
-
 	int sleep_time = sleep_option[0] == '\0' ? 0 : atoi(sleep_option);
 	int pause_time = pause_option[0] == '\0' ? 0 : atoi(pause_option);
 
@@ -80,37 +77,60 @@ int main(int argc, char** argv) {
 
 	int loop = loop_option[0] == '\0' ? 0 : 1;
 
-	cv::Mat frame;
-
-	struct timespec start, end;
-
-	int ansiColor;
-
-	unsigned char* data;
-
 	setvbuf(stdout, NULL, _IOFBF, 0);
 
 	if(nointer_option[0] == '\0')
 		signal(SIGINT, sig_handler);
 
-	terminate = 0;
+	register int frameNum = 0;
+	do {
+		frameNum = play(filename, fps_option, frameNum);
+	} while(loop && frameNum > 1);
 
-beginMediaRead:
+	if(terminate) {
+		printf("\n");
+		fflush(stdout);
+		return 0;
+	}
+
+	if(pause_time)
+		waitFrame(1000 * pause_time, 0);
+	if(sleep_time)
+		sleep(sleep_time);
+
+	if(noexit)
+		while(1)
+			sleep(60);
+
+	return 0;
+
+}
+
+int play(char* filename, char* fps_option, int subsequentPlay) {
 	cv::VideoCapture cap(filename);
 	if(!cap.isOpened()) return error((char*)"Can't read input");
 
 	double fps = fps_option[0] == '\0' ? cap.get(CV_CAP_PROP_FPS) : atof(fps_option);
+
+	struct timespec start, end;
 
 	uint64_t delta_ns;
 	uint64_t delayNecessary = fps == 0 || isnan(fps) ? 0 : NANO_CONV_FACTOR/fps;
 
 	register int frameNum = 0;
 
+	register int width, height, nchannels, step, offset;
+	register int i, j;
+	register unsigned char r_ch, b_ch, g_ch;
+	cv::Mat frame;
+	int ansiColor;
+	unsigned char* data;
+
 	for(;;) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
-		if(!frame.empty()) {
+		if(!frame.empty() || subsequentPlay) {
 
 			cap >> frame;
 
@@ -174,22 +194,7 @@ beginMediaRead:
 
 	}
 
-	if(terminate)
-		return 0;
-
-	if(pause_time)
-		waitFrame(1000 * pause_time, 0);
-	if(sleep_time)
-		sleep(sleep_time);
-
-	if(loop && frameNum > 1)
-		goto beginMediaRead;
-
-	if(noexit)
-		while(1)
-			sleep(60);
-
-	return 0;
+	return frameNum;
 
 }
 
