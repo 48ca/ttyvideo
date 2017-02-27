@@ -136,6 +136,8 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 
 	int stringLength = strlen(string);
 
+	int stopAfterFrame = 0;
+
 	for(;;) {
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
@@ -198,10 +200,12 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 			}
 		}
 
-		if(terminate && !no_interrupts) {
-			// Wait some milliseconds to let stdout finish its business
-			waitFrame(80000, 0);
+		if(stopAfterFrame) {
 			break;
+		}
+
+		if(terminate && !no_interrupts) {
+			stopAfterFrame = 1;
 		}
 
 		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
