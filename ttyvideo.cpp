@@ -14,6 +14,11 @@
 #include <unistd.h>
 #include <signal.h>
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #define NANO_CONV_FACTOR 1000000000
 
 #define COLOR_TEXT_FORMAT "\x1B[48;05;%um\x1B[38;05;%um%c"
@@ -140,7 +145,19 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 
 	for(;;) {
 
-		clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+		clock_serv_t cclock;
+		mach_timespec_t mts;
+		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+		clock_get_time(cclock, &mts);
+		mach_port_deallocate(mach_task_self(), cclock);
+		start.tv_sec = mts.tv_sec;
+		start.tv_nsec = mts.tv_nsec;
+
+		#else
+		clock_gettime(CLOCK_REALTIME, &start);
+		#endif
+		// clock_gettime(CLOCK_MONOTONIC_RAW, &start);
 
 		if(!frame.empty() || subsequentPlay) {
 
@@ -208,7 +225,19 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 			stopAfterFrame = 1;
 		}
 
-		clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+		// clock_serv_t cclock;
+		// mach_timespec_t mts;
+		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+		clock_get_time(cclock, &mts);
+		mach_port_deallocate(mach_task_self(), cclock);
+		end.tv_sec = mts.tv_sec;
+		end.tv_nsec = mts.tv_nsec;
+
+		#else
+		clock_gettime(CLOCK_REALTIME, &end);
+		#endif
+		// clock_gettime(CLOCK_MONOTONIC_RAW, &end);
 
 		delta_ns = (end.tv_sec - start.tv_sec) * NANO_CONV_FACTOR + (end.tv_nsec - start.tv_nsec);
 
