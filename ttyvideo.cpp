@@ -112,11 +112,12 @@ int main(int argc, char** argv) {
 
 	if((loop && frameNum == 1) || noexit) {
 		terminate = 0; // Terminate to 0 so we can work with it
-		while(no_interrupts) {
+		while(true) {
 			sleep(1);
 			// When SIG_INT is sent to a frozen frame,
 			// re-render the frame
 			if(terminate) {
+				if(!no_interrupts) return 0;
 				frameNum = play(filename, string_option, fps_option, frameNum);
 				terminate = 0;
 			}
