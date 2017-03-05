@@ -29,6 +29,7 @@ int waitFrame(uint64_t, uint64_t);
 unsigned char generateANSIColor(unsigned char, unsigned char, unsigned char);
 void getTTYDims();
 int play(char*, char*, char*, int);
+void getSystemTime(struct timespec*);
 
 int tty_width;
 int tty_height;
@@ -145,19 +146,7 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 
 	for(;;) {
 
-		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-		clock_serv_t cclock;
-		mach_timespec_t mts;
-		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-		clock_get_time(cclock, &mts);
-		mach_port_deallocate(mach_task_self(), cclock);
-		start.tv_sec = mts.tv_sec;
-		start.tv_nsec = mts.tv_nsec;
-
-		#else
-		clock_gettime(CLOCK_REALTIME, &start);
-		#endif
-		// clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+		getSystemTime(&start);
 
 		if(!frame.empty() || subsequentPlay) {
 
@@ -225,19 +214,7 @@ int play(char* filename, char* string, char* fps_option, int subsequentPlay) {
 			stopAfterFrame = 1;
 		}
 
-		#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
-		// clock_serv_t cclock;
-		// mach_timespec_t mts;
-		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-		clock_get_time(cclock, &mts);
-		mach_port_deallocate(mach_task_self(), cclock);
-		end.tv_sec = mts.tv_sec;
-		end.tv_nsec = mts.tv_nsec;
-
-		#else
-		clock_gettime(CLOCK_REALTIME, &end);
-		#endif
-		// clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+		getSystemTime(&end);
 
 		delta_ns = (end.tv_sec - start.tv_sec) * NANO_CONV_FACTOR + (end.tv_nsec - start.tv_nsec);
 
@@ -280,5 +257,26 @@ void getTTYDims() {
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	tty_width = tty_width_custom > 0 ? tty_width_custom : w.ws_col;
 	tty_height = tty_height_custom > 0 ? tty_height_custom : w.ws_row;
+
+}
+
+void getSystemTime(struct timespec* tv) {
+
+		#ifdef __MACH__
+
+		clock_serv_t cclock;
+		mach_timespec_t mts;
+		host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+		clock_get_time(cclock, &mts);
+		mach_port_deallocate(mach_task_self(), cclock);
+
+		tv->tv_sec = mts.tv_sec;
+		tv->tv_nsec = mts.tv_nsec;
+
+		#else
+
+		clock_gettime(CLOCK_REALTIME, tv);
+
+		#endif
 
 }
