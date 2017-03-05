@@ -66,7 +66,7 @@ char* addArgument(char* helpText, int numArguments, char* firstCall, char* secon
 	}
 
 	// TODO: Add ability to allocate lots of these
-	char* argumentMemLocation = (char*)malloc(sizeof(char));
+	char* argumentMemLocation = (char*)malloc(sizeof(char) * MAX_ARG_SIZE);
 	if(argumentMemLocation == NULL) {
 		fprintf(stderr, "Couldn't allocate memory to store argument to pass to %s", firstCall);
 		return NULL;
