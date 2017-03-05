@@ -110,9 +110,18 @@ int main(int argc, char** argv) {
 
 	} while(loop && frameNum > 1);
 
-	if((loop && frameNum == 1) || noexit)
-		while(!terminate || no_interrupts)
-			sleep(60);
+	if((loop && frameNum == 1) || noexit) {
+		terminate = 0; // Terminate to 0 so we can work with it
+		while(no_interrupts) {
+			sleep(1);
+			// When SIG_INT is sent to a frozen frame,
+			// re-render the frame
+			if(terminate) {
+				frameNum = play(filename, string_option, fps_option, frameNum);
+				terminate = 0;
+			}
+		}
+	}
 
 	printf("\n");
 	fflush(stdout);
