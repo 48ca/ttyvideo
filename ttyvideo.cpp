@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
 	char* nointer_option = addArgument(C"No interrupts", TAKES_NO_ARGUMENTS, C"--no-interrupts", NULL);
 	char* fps_option     = addArgument(C"FPS", TAKES_ONE_ARGUMENT, C"--fps", NULL);
 	char* string_option  = addArgument(C"String to place in the foreground", TAKES_ONE_ARGUMENT, C"--string", NULL);
+	char* info_option    = addArgument(C"Print terminal dimensions", TAKES_NO_ARGUMENTS, C"-i", C"--info");
 
 	int argError;
 	argError = handle(argc, argv);
@@ -65,6 +66,13 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
+	if(info_option[0] != '\0') {
+		getTTYDims();
+		printf("Height: %d\nWidth: %d\n",
+				tty_height, tty_width);
+		return 0;
+	}
+
 	if(filename[0] == '\0')
 		return error((char*)"No input file specified");
 
@@ -73,9 +81,15 @@ int main(int argc, char** argv) {
 	tty_height_custom = atoi(height_option);
 	tty_width_custom = atoi(width_option);
 
-	if(tty_height_custom > tty_height || tty_width_custom > tty_width) {
-		error((char*)"The specified dimensions are too large, but we will play the video anyway");
-		sleep(1);
+	if(tty_height == 0 && tty_width == 0) {
+		if(tty_height_custom == 0 || tty_width_custom == 0) {
+			error((char*)"Could not detect terminal dimensions and specified dimensions are incomplete");
+			return 1;
+		}
+	} else {
+		if(tty_height_custom > tty_height || tty_width_custom > tty_width) {
+			error((char*)"The specified dimensions are too large, but we will play the video anyway");
+		}
 	}
 
 	getTTYDims(); // get real dims -- including user specification
